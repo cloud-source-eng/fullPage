@@ -8,7 +8,7 @@ import {
     getContainer
 } from './common/options.js';
 import { getState } from './common/state.js';
-import { FP } from './common/constants.js';
+import { FP, win } from './common/constants.js';
 import { $body, $htmlBody } from './common/cache.js';
 import { setRecordHistory } from './anchors/setRecordHistory.js';
 import { SCROLLABLE } from './common/selectors.js';
@@ -46,8 +46,13 @@ export function setAutoScrolling(value, type){
         });
 
         if(element != null){
+            var scrollable = getScrollSettings(0).element;
+            var scrollableTop = scrollable.self === win ? 0 : scrollable.getBoundingClientRect().top;
+            var scrollableScrollTop = scrollable.self === win ? utils.getScrollTop() : scrollable.scrollTop;
+            var elementTop = element.getBoundingClientRect().top - scrollableTop + scrollableScrollTop;
+
             //moving the container up
-            silentScroll(element.offsetTop);
+            silentScroll(elementTop);
         }
     }else{
         utils.css($htmlBody, {
@@ -68,7 +73,12 @@ export function setAutoScrolling(value, type){
 
         //scrolling the page to the section with no animation
         if (element != null) {
-            var scrollSettings = getScrollSettings(element.offsetTop);
+            var scrollable = getScrollSettings(0).element;
+            var scrollableTop = scrollable.self === win ? 0 : scrollable.getBoundingClientRect().top;
+            var scrollableScrollTop = scrollable.self === win ? utils.getScrollTop() : scrollable.scrollTop;
+            var elementTop = element.getBoundingClientRect().top - scrollableTop + scrollableScrollTop;
+
+            var scrollSettings = getScrollSettings(elementTop);
             scrollSettings.element.scrollTo(0, scrollSettings.options);
         }
     }

@@ -3,6 +3,8 @@ import { getOptions, getContainer, setVariableState } from './common/options.js'
 import { getPanelByElement, Item } from './common/item.js';
 import { ACTIVE, OVERFLOW } from './common/selectors.js';
 import { getState, state } from './common/state.js';
+import { getScrollSettings } from './common/utilsFP.js';
+import { win } from './common/constants.js';
 import { silentScroll } from './common/silentScroll.js';
 import { silentLandscapeScroll } from './slides/silentLandscapeScroll.js';
 import { scrollOverflowHandler } from './scrolloverflow.js';
@@ -43,6 +45,18 @@ export function updateState(){
                     section.activeSlide = slide;
                 }
             });
+
+            if(!section.slides.find(slide => slide.isActive)){
+                // RTL: start from last slide, otherwise start from first
+                var defaultSlide = getOptions().rtl && section.slides.length > 0 
+                    ? section.slides[section.slides.length - 1] 
+                    : section.slides[0];
+                    
+                section.activeSlide = defaultSlide;
+                if(section.activeSlide){
+                    section.activeSlide.isActive = true;
+                }
+            }
         }
     });
 
@@ -105,7 +119,13 @@ function scrollToNewActivePanel(){
             utils.addClass(state.activeSection.item, ACTIVE);
         }
         if(state.activeSection){
-            silentScroll(state.activeSection.item.offsetTop);
+            var item = state.activeSection.item;
+            var scrollable = getScrollSettings(0).element;
+            var scrollableTop = scrollable.self === win ? 0 : scrollable.getBoundingClientRect().top;
+            var scrollableScrollTop = scrollable.self === win ? utils.getScrollTop() : scrollable.scrollTop;
+            var elementTop = item.getBoundingClientRect().top - scrollableTop + scrollableScrollTop;
+
+            silentScroll(elementTop);
         }
     }
     if(activeSectionHasSlides && !activeSlide && g_prevActiveSlideIndex !== null){
@@ -147,7 +167,17 @@ export let SectionPanel = function(el){
     this.allSlidesItems = utils.$(getOptions().slideSelector, el);
     this.slidesIncludingHidden = Array.from(this.allSlidesItems).map( item => new SlidePanel(item, this));
     this.slides = this.slidesIncludingHidden.filter(slidePanel => slidePanel.isVisible);
-    this.activeSlide = this.slides.length ? this.slides.filter(slide => slide.isActive)[0] || this.slides[0]: null;
+    
+    // RTL: start from last slide, otherwise start from first
+    var defaultSlide = getOptions().rtl && this.slides.length > 0 
+        ? this.slides[this.slides.length - 1] 
+        : (this.slides.length > 0 ? this.slides[0] : null);
+    
+    this.activeSlide = this.slides.length ? this.slides.filter(slide => slide.isActive)[0] || defaultSlide: null;
+
+    if(this.activeSlide){
+        this.activeSlide.isActive = true;
+    }
 };
 SectionPanel.prototype = Item.prototype;
 SectionPanel.prototype.constructor = SectionPanel;

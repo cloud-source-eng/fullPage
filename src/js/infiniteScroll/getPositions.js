@@ -4,9 +4,7 @@ import { getDestinationPosition } from "../scroll/scrollPage.js";
 import { AUTO_HEIGHT } from '../common/selectors.js';
 
 export function getTmpPosition(v){
-    return utils.hasClass(getState().activeSection.item, AUTO_HEIGHT) 
-        ? getDestinationPosition(getState().activeSection.item) 
-        : getState().activeSection.item.offsetTop;
+    return getDestinationPosition(getState().activeSection.item);
 }
 
 export function getDestinationPosForInfiniteScroll(v){
@@ -15,5 +13,5 @@ export function getDestinationPosForInfiniteScroll(v){
         return getDestinationPosition(v.element) - utils.getWindowHeight() + v.element.offsetHeight;
     }
     
-    return v.element.offsetTop;
+    return getDestinationPosition(v.element);
 }

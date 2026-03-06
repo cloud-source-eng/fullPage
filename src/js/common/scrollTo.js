@@ -78,7 +78,7 @@ function getScrolledPosition(element){
         position = utils.getScrollTop();
     }
     else{
-        position = element.offsetTop;
+        position = element.getBoundingClientRect().top + utils.getScrollTop();
     }
 
     //gets the top property of the wrapper

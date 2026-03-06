@@ -1,7 +1,7 @@
 import * as utils from '../common/utils.js';
 import { getOptions, getOriginals, setOption, setVariableState, getContainer } from '../common/options.js';
 import { getState, setState, state } from '../common/state.js';
-import { doc, FP } from '../common/constants.js';
+import { doc, win, FP } from '../common/constants.js';
 import { $html, $htmlBody } from '../common/cache.js';
 import { transformContainer } from '../common/transformContainer.js';
 import { scrollTo } from '../common/scrollTo.js';
@@ -153,8 +153,10 @@ function onDestroy(){
 */
 export function getDestinationPosition(element){
     var elementHeight = element.offsetHeight;
-    var container = getContainer();
-    var elementTop = element.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+    var scrollable = getScrollSettings(0).element;
+    var scrollableTop = scrollable.self === win ? 0 : scrollable.getBoundingClientRect().top;
+    var scrollableScrollTop = scrollable.self === win ? utils.getScrollTop() : scrollable.scrollTop;
+    var elementTop = element.getBoundingClientRect().top - scrollableTop + scrollableScrollTop;
 
     //top of the desination will be at the top of the viewport
     var position = elementTop;
@@ -290,5 +292,18 @@ function afterSectionLoads(v){
 
     if(utils.isFunction(v.callback)){
         v.callback();
+    }
+}
+
+/**
+* Scrolls the site to the given element and scrolls to the slide if a callback is given.
+*/
+export function moveTo(sectionAnchor, slideAnchor){
+    var destiny = utils.getSectionByAnchor(sectionAnchor);
+
+    if (typeof slideAnchor !== 'undefined'){
+        scrollPageAndSlide(sectionAnchor, slideAnchor);
+    }else if(destiny != null){
+        scrollPage(destiny);
     }
 }

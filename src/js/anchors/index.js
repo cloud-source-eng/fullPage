@@ -111,6 +111,6 @@ function anchorLinkClickHandler(e){
     
     var scrollable = utils.$(OVERFLOW_SEL, slide ? slide.item : section.item)[0];
     if(scrollable){
-        scrollable.scrollTo(0, targetElement.offsetTop);
+        scrollable.scrollTo(0, targetElement.getBoundingClientRect().top - scrollable.getBoundingClientRect().top + scrollable.scrollTop);
     }
 }

@@ -1,5 +1,5 @@
 import * as utils from '../common/utils.js';
-import { getOptions, getOriginals, setOption, setVariableState } from '../common/options.js';
+import { getOptions, getOriginals, setOption, setVariableState, getContainer } from '../common/options.js';
 import { getState, setState, state } from '../common/state.js';
 import { doc, FP } from '../common/constants.js';
 import { $html, $htmlBody } from '../common/cache.js';
@@ -153,7 +153,8 @@ function onDestroy(){
 */
 export function getDestinationPosition(element){
     var elementHeight = element.offsetHeight;
-    var elementTop = element.offsetTop;
+    var container = getContainer();
+    var elementTop = element.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
 
     //top of the desination will be at the top of the viewport
     var position = elementTop;

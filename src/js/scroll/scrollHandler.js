@@ -7,7 +7,7 @@ import { lazyLoadPanels } from '../lazyLoad/lazyLoad.js';
 import { setPageStatus } from '../anchors/setPageStatus.js';
 import { activateMenuAndNav } from '../menu/activateMenuAndNav.js';
 import { $body } from '../common/cache.js';
-import { getYmovement } from '../common/utilsFP.js';
+import { getYmovement, getScrollSettings } from '../common/utilsFP.js';
 import { 
     COMPLETELY,
     ACTIVE
@@ -60,11 +60,16 @@ export function scrollHandler(e){
 
         //taking the section which is showing more content in the viewport
         else{
+            var scrollable = getScrollSettings(0).element;
+            var scrollableTop = scrollable.self === win ? 0 : scrollable.getBoundingClientRect().top;
+            var scrollableScrollTop = scrollable.self === win ? utils.getScrollTop() : scrollable.scrollTop;
+
             for (var i = 0; i < sections.length; ++i) {
                 var section = sections[i].item;
+                var elementTop = section.getBoundingClientRect().top - scrollableTop + scrollableScrollTop;
 
                 // Pick the the last section which passes the middle line of the screen.
-                if (section.offsetTop <= screen_mid)
+                if (elementTop <= screen_mid)
                 {
                     visibleSectionIndex = i;
                 }
@@ -210,7 +215,11 @@ function getScrollDirection(currentScroll){
 * Determines whether the active section has seen in its whole or not.
 */
 function isCompletelyInViewPort(movement){
-    var top = getState().activeSection.item.offsetTop;
+    var item = getState().activeSection.item;
+    var scrollable = getScrollSettings(0).element;
+    var scrollableTop = scrollable.self === win ? 0 : scrollable.getBoundingClientRect().top;
+    var scrollableScrollTop = scrollable.self === win ? utils.getScrollTop() : scrollable.scrollTop;
+    var top = item.getBoundingClientRect().top - scrollableTop + scrollableScrollTop;
     var bottom = top + utils.getWindowHeight();
 
     if(movement == 'up'){

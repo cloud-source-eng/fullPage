@@ -3,6 +3,7 @@ import { getState, setState } from "../common/state.js";
 import { setPrevTime } from '../common/tick.js';
 import { wheelDataHandler } from './wheelDataHandler.js';
 import { getScrollSettings } from '../common/utilsFP.js';
+import { win } from '../common/constants.js';
 import { scrollUpToFullpage } from './scrollBeyondFullPage.js';
 
 export function beyondFullPageHandler(container, e){
@@ -24,7 +25,13 @@ export function beyondFullPageHandler(container, e){
             var shouldSetFixedPosition = !g_isAboutToScrollToFullPage && (!keyframeTime('isNewKeyframe', 'beyondFullpage') || !wheelDataHandler.isAccelerating() );
             var scrollSettings;
             if( shouldSetFixedPosition ){
-                scrollSettings = getScrollSettings(utils.getLast(getState().sections).item.offsetTop + utils.getLast(getState().sections).item.offsetHeight);
+                var item = utils.getLast(getState().sections).item;
+                var scrollable = getScrollSettings(0).element;
+                var scrollableTop = scrollable.self === win ? 0 : scrollable.getBoundingClientRect().top;
+                var scrollableScrollTop = scrollable.self === win ? utils.getScrollTop() : scrollable.scrollTop;
+                var elementTop = item.getBoundingClientRect().top - scrollableTop + scrollableScrollTop;
+
+                scrollSettings = getScrollSettings(elementTop + item.offsetHeight);
                 scrollSettings.element.scrollTo(0, scrollSettings.options);
                 setState({isAboutToScrollToFullPage: false});
 

@@ -1,7 +1,7 @@
 import * as utils from '../common/utils.js';
 import { getScrollSettings, isFullPageAbove } from '../common/utilsFP.js';
 import { getOptions } from '../common/options.js';
-import { doc, FP } from '../common/constants.js';
+import { doc, win, FP } from '../common/constants.js';
 import { $html, $htmlBody } from '../common/cache.js';
 import { getState, setState } from '../common/state.js';
 import { scrollTo } from '../common/scrollTo.js';
@@ -29,7 +29,13 @@ export function onKeyDown(){
 }
 
 export function scrollUpToFullpage(){
-    var scrollSettings = getScrollSettings(utils.getLast(getState().sections).item.offsetTop);
+    var item = utils.getLast(getState().sections).item;
+    var scrollable = getScrollSettings(0).element;
+    var scrollableTop = scrollable.self === win ? 0 : scrollable.getBoundingClientRect().top;
+    var scrollableScrollTop = scrollable.self === win ? utils.getScrollTop() : scrollable.scrollTop;
+    var elementTop = item.getBoundingClientRect().top - scrollableTop + scrollableScrollTop;
+
+    var scrollSettings = getScrollSettings(elementTop);
     setState({canScroll: false});
     
     scrollTo(scrollSettings.element, scrollSettings.options, getOptions().scrollingSpeed, function(){
@@ -41,7 +47,13 @@ export function scrollUpToFullpage(){
 
 function getDestinationOffset(){
     if(!getOptions().css3){
-        return utils.getLast(getState().sections).item.offsetTop + utils.getLast(getState().sections).item.offsetHeight;
+        var item = utils.getLast(getState().sections).item;
+        var scrollable = getScrollSettings(0).element;
+        var scrollableTop = scrollable.self === win ? 0 : scrollable.getBoundingClientRect().top;
+        var scrollableScrollTop = scrollable.self === win ? utils.getScrollTop() : scrollable.scrollTop;
+        var elementTop = item.getBoundingClientRect().top - scrollableTop + scrollableScrollTop;
+
+        return elementTop + item.offsetHeight;
     }
     return utils.getScrollTop() +  utils.getWindowHeight();
 }
